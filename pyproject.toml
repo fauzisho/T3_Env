@@ -14,8 +14,8 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
-keywords = ["tictactoe", "gym"]
-dependencies = ["gym"]
+keywords = ["tictactoe", "gym", "pygame"]
+dependencies = ["gym", "pygame"]
 requires-python = ">=3.10"
 
 [project.urls]

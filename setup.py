@@ -8,5 +8,5 @@ setup(
       url='https://github.com/fauzisho/T3_Env',
       author='AI Trafic Project',
       license='MIT License',
-      install_requires=['gym']
+      install_requires=['gym','pygame']
 )
