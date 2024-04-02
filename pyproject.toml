@@ -3,8 +3,8 @@ requires      = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tictactoe_gui_gym"
-version = "0.0.1"
+name = "gym_gui_tictactoe"
+version = "0.1"
 description = "An OpenAI gym environment for playing Tic Tac Toe with GUI"
 readme = "README.md"
 authors = [{ name = "AI Trafic Project" }]

@@ -1,4 +1,4 @@
-from tictactoe_gui_gym.envs.tictactoe_env import TicTacToeEnv
+from gym_gui_tictactoe.envs.tictactoe_env import TicTacToeEnv
 
 if __name__ == "__main__":
     env = TicTacToeEnv()
