@@ -9,7 +9,7 @@ pip install gym-gui-tictactoe
 
 ## How to Use
 ```
-gym.make('tictactoe-gui-v0')
+gym.make("gym_gui_tictactoe/tictactoe-gui-v0")
 ```
 
 ## How to run demo
