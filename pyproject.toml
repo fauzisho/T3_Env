@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gym_gui_tictactoe"
-version = "0.1"
+version = "0.1.1"
 description = "An OpenAI gym environment for playing Tic Tac Toe with GUI"
 readme = "README.md"
 authors = [{ name = "AI Trafic Project" }]
@@ -16,7 +16,7 @@ classifiers = [
 ]
 keywords = ["tictactoe", "gym", "pygame"]
 dependencies = ["gym", "pygame"]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 
 [project.urls]
 Homepage = "https://github.com/fauzisho/T3_Env.git"
