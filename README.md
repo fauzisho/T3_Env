@@ -1,3 +1,7 @@
+# AI Trafic Project Group (Tic-Tac-Toe)
+
+![ss.png](assets%2Fss.png)
+
 ## Installation
 ```
 pip install gym-gui-tictactoe
