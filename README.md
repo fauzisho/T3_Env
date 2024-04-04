@@ -19,10 +19,10 @@ import gym
 if __name__ == "__main__":
     env = gym.make("gym_gui_tictactoe/tictactoe-gui-v0")
     env.reset()
-    terminal = False
-    while not terminal:
+    gameOver = False
+    while not gameOver:
         action = input("Select action (" + ", ".join(map(str, env.get_actions())) + "): ")
-        observation, winner, terminal, truncated, info = env.step(int(action))
+        observation, winner, gameOver, truncated, info = env.step(int(action))
         env.render()
 
     if winner != 0:
