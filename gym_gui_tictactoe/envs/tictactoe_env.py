@@ -378,21 +378,133 @@ class TicTacToeEnv(Env):
         Renders the current observation in the terminal as a string.
 
         """
+import gym
+import numpy as np
+import pygame
+from gym.spaces import Discrete, Box
+from gym.utils import EzPickle
+from typing import Any, Tuple, Dict
 
-        observation = self.get_observation(player=1)
+class TicTacToeEnv(gym.Env, EzPickle):
+    def __init__(self):
+        super().__init__()
+        self.action_space = Discrete(9)
+        self.observation_space = Box(low=-1, high=1, shape=(9,), dtype=np.int8)
+        self.board = [[' ' for _ in range(3)] for _ in range(3)]
+        self.current_player = 'X'
+        self.done = False
+        self.winner = None
 
-        render_game = ""
-        for i in range(len(observation)):
-            row = ""
-            for j in range(len(observation[i])):
-                if observation[i][j] == 0:
-                    row += "."
-                elif observation[i][j] == 1:
-                    row += "X"
-                elif observation[i][j] == -1:
-                    row += "O"
-                else:
-                    row += "-"
-            row += "\n"
-            render_game += row            
-        print(render_game)
+        # Initialize Pygame
+        pygame.init()
+        self.screen_width = 800
+        self.screen_height = 600
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        self.clock = pygame.time.Clock()
+
+        # Load images
+        self.cross_img = pygame.image.load("Cross.png")
+        self.cross_img = pygame.transform.scale(self.cross_img, (100, 100))
+        self.nought_img = pygame.image.load("Nought.png")
+        self.nought_img = pygame.transform.scale(self.nought_img, (100, 100))
+
+        # Initialize font
+        self.font = pygame.font.SysFont("Arial", 32)
+
+        EzPickle.__init__(self)
+
+    def step(self, action: int) -> Tuple[np.ndarray, int, bool, Dict[str, Any]]:
+        if self.done:
+            raise RuntimeError("Episode is done, please reset the environment.")
+
+        row, col = action // 3, action % 3
+        if self.board[row][col] == ' ':
+            print(f"Marked position: ({row}, {col})")
+            self.board[row][col] = self.current_player
+            self.winner = self._game_state(self.board)
+            self.done = self.winner != 'ONGOING'
+            reward = self._assign_reward(self.winner)
+            if self.winner.endswith('_WON'):
+                print(f"Congratulations! Player {self.current_player} won.")
+            self.current_player = 'O' if self.current_player == 'X' else 'X'
+            observation = self._take_photo(self.board)
+            return observation, reward, self.done, {}
+        else:
+            return self._get_observation(), 0, False, {}
+
+    def _get_observation(self) -> np.ndarray:
+        return self._take_photo(self.board)
+
+    def reset(self) -> np.ndarray:
+        self.board = [[' ' for _ in range(3)] for _ in range(3)]
+        self.current_player = 'X'
+        self.done = False
+        self.winner = None
+        return self._get_observation()
+
+    def render(self):
+        self.screen.fill((255, 255, 255))
+
+        for row in range(3):
+            for col in range(3):
+                x_pos = col * 200 + 250
+                y_pos = row * 200 + 150
+                if self.board[row][col] == 'X':
+                    self.screen.blit(self.cross_img, (x_pos, y_pos))
+                elif self.board[row][col] == 'O':
+                    self.screen.blit(self.nought_img, (x_pos, y_pos))
+                pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(x_pos, y_pos, 100, 100), 1)
+
+        pygame.display.flip()
+
+    def _take_photo(self, board: list[list[str]]) -> np.ndarray:
+        """Take a photo of the current board state."""
+        return np.array(board).reshape(-1)
+
+    def _game_state(self, board: list[list[str]]) -> str:
+        """Determine the state of the game: ongoing, X won, O won, or draw."""
+        lines = board + \
+                [[board[j][i] for j in range(3)] for i in range(3)] + \
+                [[board[i][i] for i in range(3)]] + \
+                [[board[i][2 - i] for i in range(3)]]
+        for line in lines:
+            if len(set(line)) == 1 and line[0] != ' ':
+                return line[0] + '_WON'
+        if any(' ' in line for line in board):
+            return 'ONGOING'
+        return 'DRAW'
+
+    def _assign_reward(self, state: str) -> int:
+        """Assign reward based on the game state."""
+        if state == 'X_WON':
+            return 1
+        elif state == 'O_WON':
+            return -1
+        else:
+            return 0
+
+
+def main():
+    env = TicTacToeEnv()
+    done = False
+    observation = env.reset()
+    env.render()
+
+    while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                row = (mouse_y - 150) // 200
+                col = (mouse_x - 250) // 200
+                action = row * 3 + col
+                observation, reward, done, info = env.step(action)
+                env.render()
+
+    pygame.quit()
+
+
+if __name__ == "__main__":
+    main()
+
