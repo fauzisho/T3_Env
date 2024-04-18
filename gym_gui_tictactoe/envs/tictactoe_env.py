@@ -394,6 +394,7 @@ class TicTacToeEnv(gym.Env, EzPickle):
         self.current_player = 'X'
         self.done = False
         self.winner = None
+        self.observation = self._take_photo(self.board)  # Store observation locally
 
         # Initialize Pygame
         pygame.init()
@@ -403,10 +404,8 @@ class TicTacToeEnv(gym.Env, EzPickle):
         self.clock = pygame.time.Clock()
 
         # Load images
-        self.cross_img = pygame.image.load("Cross.png")
-        self.cross_img = pygame.transform.scale(self.cross_img, (100, 100))
-        self.nought_img = pygame.image.load("Nought.png")
-        self.nought_img = pygame.transform.scale(self.nought_img, (100, 100))
+        self.cross_img = pygame.transform.scale(pygame.image.load("Cross.png"), (100, 100))
+        self.nought_img = pygame.transform.scale(pygame.image.load("Nought.png"), (100, 100))
 
         # Initialize font
         self.font = pygame.font.SysFont("Arial", 32)
@@ -427,20 +426,18 @@ class TicTacToeEnv(gym.Env, EzPickle):
             if self.winner.endswith('_WON'):
                 print(f"Congratulations! Player {self.current_player} won.")
             self.current_player = 'O' if self.current_player == 'X' else 'X'
-            observation = self._take_photo(self.board)
-            return observation, reward, self.done, {}
+            self.observation = self._take_photo(self.board)  # Update observation
+            return self.observation, reward, self.done, {}
         else:
-            return self._get_observation(), 0, False, {}
-
-    def _get_observation(self) -> np.ndarray:
-        return self._take_photo(self.board)
+            return self.observation, 0, False, {}
 
     def reset(self) -> np.ndarray:
         self.board = [[' ' for _ in range(3)] for _ in range(3)]
         self.current_player = 'X'
         self.done = False
         self.winner = None
-        return self._get_observation()
+        self.observation = self._take_photo(self.board)  # Reset observation
+        return self.observation
 
     def render(self):
         self.screen.fill((255, 255, 255))
@@ -463,11 +460,9 @@ class TicTacToeEnv(gym.Env, EzPickle):
 
     def _game_state(self, board: list[list[str]]) -> str:
         """Determine the state of the game: ongoing, X won, O won, or draw."""
-        lines = board + \
-                [[board[j][i] for j in range(3)] for i in range(3)] + \
-                [[board[i][i] for i in range(3)]] + \
-                [[board[i][2 - i] for i in range(3)]]
-        for line in lines:
+        for line in board + [[board[j][i] for j in range(3)] for i in range(3)] + \
+                     [[board[i][i] for i in range(3)]] + \
+                     [[board[i][2 - i] for i in range(3)]]:
             if len(set(line)) == 1 and line[0] != ' ':
                 return line[0] + '_WON'
         if any(' ' in line for line in board):
@@ -494,7 +489,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0]:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 row = (mouse_y - 150) // 200
                 col = (mouse_x - 250) // 200
@@ -507,4 +502,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
